@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SmoothMouseLook : MonoBehaviour
 {
@@ -21,6 +22,8 @@ public class SmoothMouseLook : MonoBehaviour
     float xVel;
     float yVel;
 
+    private InputAction lookAction;
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -31,15 +34,16 @@ public class SmoothMouseLook : MonoBehaviour
         targetY = rot.x;
         currentX = targetX;
         currentY = targetY;
+
+        lookAction = InputSystem.actions.FindAction("Look");
     }
 
     void Update()
     {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * 100f * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * 100f * Time.deltaTime;
+        Vector2 lookDir = lookAction.ReadValue<Vector2>() * mouseSensitivity * Time.deltaTime;
 
-        targetX += mouseX;
-        targetY -= mouseY;
+        targetX += lookDir.x;
+        targetY -= lookDir.y;
         targetY = Mathf.Clamp(targetY, minY, maxY);
 
         currentX = Mathf.SmoothDamp(currentX, targetX, ref xVel, smoothTime);

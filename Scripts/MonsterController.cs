@@ -53,7 +53,7 @@ public class MonsterController : MonoBehaviour
 
             bool open = doorOpenAmount > 0f;
             lowPass.enabled = true;
-            doorOpenAmount += (flashlight.IsOn) ? -doorCloseSpeed * Time.deltaTime : doorOpenSpeed * Time.deltaTime;
+            doorOpenAmount += (flashlight.IsOn && door.gameObject.GetComponent<MeshRenderer>().isVisible) ? -doorCloseSpeed * Time.deltaTime : doorOpenSpeed * Time.deltaTime;
             doorOpenAmount = Mathf.Clamp(doorOpenAmount, 0, maxOpenDegrees);
                       
             door.localRotation = Quaternion.Euler(0f, doorOpenAmount, 0f);

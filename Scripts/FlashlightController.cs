@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class FlashlightController : MonoBehaviour
 {
@@ -6,7 +7,7 @@ public class FlashlightController : MonoBehaviour
     [SerializeField] AudioClip _onSFX;
     [SerializeField] AudioClip _offSFX;
     [SerializeField] AudioClip _deadSFX;
-    [SerializeField] KeyCode _toggleKey;
+    private InputAction flashlightAction;
 
     [Header("Battery")]
     public float Battery = 100f;
@@ -41,6 +42,7 @@ public class FlashlightController : MonoBehaviour
     {
         _lightSource.SetActive(false);
         _offset = transform.position - _cameraObject.transform.position;
+        flashlightAction = InputSystem.actions.FindAction("Flashlight");
     }
 
     private void Update()
@@ -62,7 +64,7 @@ public class FlashlightController : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(_toggleKey))
+        if (flashlightAction.WasPressedThisFrame())
         {
             if (Battery <= 0f)
             {
@@ -73,7 +75,7 @@ public class FlashlightController : MonoBehaviour
             _audioSource.PlayOneShot(_onSFX);
         }
 
-        if (Input.GetKeyUp(_toggleKey))
+        if (flashlightAction.WasReleasedThisFrame())
         {
             if (Battery <= 0f)
                 return;

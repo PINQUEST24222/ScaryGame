@@ -5,7 +5,6 @@ public class SanityManager : MonoBehaviour
     [Header("Sanity")]
     public static float sanity = 100f;
     public float drainRate = 3f;
-    public float pillRecoverAmount = 90f;
 
     [Header("Breathing Audio")]
     public AudioSource breathingSource;
