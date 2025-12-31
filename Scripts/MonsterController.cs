@@ -69,137 +69,24 @@ public class MonsterController : MonoBehaviour
         {
             if (!flashlight.IsOn)
             {
-                stageTimer += Time.deltaTime;
-
-                if (stageTimer >= timePerStage)
-                {
-                    stageTimer = 0f;
-                    AdvanceStage();
-                }
-
-                HandleDoorOpening();
+                doorOpenAmount += Time.deltaTime * 0.1f; // slow open
+                doorOpenAmount = Mathf.Clamp01(doorOpenAmount);
+                door.localRotation = Quaternion.Euler(0f, doorOpenAmount * 90f, 0f);
             }
             else
             {
-                ResetMonster();
+                if(doorOpenAmount > 0)
+                {
+                    // Slam door if it was open
+                    audioSource.PlayOneShot(doorBangSFX, 100f);
+                }
+                doorOpenAmount = 0f;
+                door.localRotation = Quaternion.identity;
             }
         }
         else
         {
             HandleInsideMovement();
-        }
-    }
-
-    void AdvanceStage()
-    {
-        currentStage++;
-        Debug.Log("Monster Stage: " + currentStage);
-
-        // Play stage sound if assigned
-        if (stageSounds != null && stageSounds.Length > currentStage && stageSounds[currentStage] != null)
-        {
-            monsterAudio.PlayOneShot(stageSounds[currentStage]);
-        }
-
-        // Increase ambient volume with stage
-        if (monsterAudio != null)
-        {
-            monsterAudio.volume = Mathf.Clamp01(currentStage * 0.25f);
-            if (!monsterAudio.isPlaying)
-                monsterAudio.Play();
-        }
-
-        if (currentStage >= maxStage)
-        {
-            KillPlayer();
-        }
-    }
-
-    void ResetMonster()
-    {
-        if (currentStage > 0)
-        {
-            currentStage = 0;
-            stageTimer = 0f;
-
-            doorOpenAmount = 0f;
-            if (door != null)
-                door.localRotation = Quaternion.identity;
-
-            if (monsterAudio != null)
-            {
-                monsterAudio.Stop();
-                monsterAudio.volume = 0f;
-            }
-
-            insideRoom = false;
-            doorSlammed = false;
-
-            Debug.Log("Monster reset by flashlight");
-        }
-    }
-
-    void HandleDoorOpening()
-    {
-        if (door == null) return;
-
-        // If flashlight is on while door is opening → slam
-        if (flashlight.IsOn && doorOpenAmount > 0f && !doorSlammed)
-        {
-            doorSlammed = true;
-
-            // instantly close door
-            doorOpenAmount = 0f;
-            door.localRotation = Quaternion.identity;
-
-            // play bang
-            if (audioSource != null && doorBangSFX != null)
-                audioSource.PlayOneShot(doorBangSFX, 100f);
-
-            Debug.Log("Door slammed by monster!");
-            return;
-        }
-
-        // normal slow opening
-        if (!doorSlammed)
-        {
-            doorOpenAmount += Time.deltaTime * 0.1f; // slow open
-            doorOpenAmount = Mathf.Clamp01(doorOpenAmount);
-            door.localRotation = Quaternion.Euler(0f, doorOpenAmount * 90f, 0f);
-
-            if (doorOpenAmount >= 1f)
-            {
-                EnterRoom();
-            }
-        }
-    }
-
-    void EnterRoom()
-    {
-        insideRoom = true;
-        distanceFromPlayer = maxDistance;
-        Debug.Log("Monster entered the room (invisible)!");
-    }
-
-    void HandleInsideMovement()
-    {
-        // Only logical distance; no 3D monster
-        float dir = flashlight.IsOn ? -1f : 1f;
-        distanceFromPlayer += dir * insideMoveSpeed * Time.deltaTime;
-        distanceFromPlayer = Mathf.Clamp(distanceFromPlayer, minDistance, maxDistance);
-
-        // Scale audio intensity with closeness
-        if (monsterAudio != null)
-        {
-            monsterAudio.volume = Mathf.Lerp(1f, 0f, distanceFromPlayer / maxDistance);
-        }
-
-        // Increase sanity drain based on proximity
-        sanityManager.sanity -= (1f - distanceFromPlayer / maxDistance) * Time.deltaTime * 2f;
-
-        if (distanceFromPlayer <= killDistance)
-        {
-            KillPlayer();
         }
     }
 
