@@ -3,18 +3,15 @@ using UnityEngine;
 public class SanityManager : MonoBehaviour
 {
     [Header("Sanity")]
-    public float sanity = 100f;
-    public float drainRate = 5f;
-    public float recoverRate = 3f;
-
-    [Header("Flashlight")]
-    public FlashlightController flashlight; // ✅ correct script
+    public static float sanity = 100f;
+    public float drainRate = 3f;
+    public float pillRecoverAmount = 90f;
 
     [Header("Breathing Audio")]
     public AudioSource breathingSource;
     public AnimationCurve volumeCurve;
 
-    bool isDead = false;
+    public static bool isDead = false;
 
     void Start()
     {
@@ -27,39 +24,21 @@ public class SanityManager : MonoBehaviour
     {
         if (isDead) return;
 
-        if (!flashlight.IsOn)
-        {
-            sanity -= drainRate * Time.deltaTime;
-            Debug.Log(sanity);
-        }
-        else
-        {
-            sanity += recoverRate * Time.deltaTime;
-        }
-
+        sanity -= drainRate * Time.deltaTime;
         sanity = Mathf.Clamp(sanity, 0f, 100f);
 
-        UpdateBreathing();
+        breathingSource.volume = volumeCurve.Evaluate(sanity);
 
         if (sanity <= 0f)
         {
-            SanityDeath();
+            AudioListener.volume = 0f;
+            Invoke("KillPlayer", 2f);
         }
     }
 
-    void UpdateBreathing()
+    public static void KillPlayer()
     {
-        breathingSource.volume = volumeCurve.Evaluate(sanity);
-    }
-
-    void SanityDeath()
-    {
+        Debug.Log("YOU DIED!!!");
         isDead = true;
-
-        // absolute silence
-        AudioListener.volume = 0f;
-
-        Debug.Log("Sanity hit 0 — everything goes silent");
-        // delay monster attack here 👁️
     }
 }

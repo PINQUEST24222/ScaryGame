@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class MonsterController : MonoBehaviour
 {
@@ -7,93 +8,74 @@ public class MonsterController : MonoBehaviour
     public SanityManager sanityManager;
     public Transform door;          // door to open
 
-    [Header("Stage Settings")]
-    public float timePerStage = 6f;
-    public int maxStage = 4;
-
     [Header("Door Settings")]
-    public float doorOpenSpeed = 20f; // degrees per second
+    public float minWaitTime;
+    public float maxWaitTime;
+    public float doorOpenSpeed; // degrees per second
+    public float doorCloseSpeed;
+    public float maxOpenDegrees;
 
     [Header("Door Slam Settings")]
     public AudioClip doorBangSFX;
-    public AudioSource audioSource; // for playing one-shot sounds
-    public float slamSpeed = 10f; // how fast the door closes
-    private bool doorSlammed;
-
-    [Header("Inside ")]
-    public float insideMoveSpeed = 1.5f;
-    public float minDistance = 0.4f;
-    public float maxDistance = 5f;
-    public float killDistance = 0.7f;
+    public float doorBangVolume;    
 
     [Header("Audio")]
-    public AudioSource monsterAudio; // looping breathing / ambient
     public AudioClip[] stageSounds;  // one-shot sounds per stage (door creaks, thumps, etc)
+    private AudioSource audioSource;
+    private AudioLowPassFilter lowPass;
+    public float maxMonsterVolume;
 
-    private float stageTimer;
-    private int currentStage;
-    private bool isDead;
-
-    private float doorOpenAmount; // 0 = closed, 1 = fully open
-    private float distanceFromPlayer;
-    private bool insideRoom;
+    private float doorOpenAmount;
+    private float nextOpenTime;
 
     void Start()
     {
-        currentStage = 0;
-        stageTimer = 0f;
-        insideRoom = false;
-        distanceFromPlayer = maxDistance;
-
-        if (monsterAudio != null)
-        {
-            monsterAudio.Stop();
-            monsterAudio.volume = 0f;
-            monsterAudio.loop = true;
-        }
+        nextOpenTime = -1;
+        audioSource = GetComponent<AudioSource>();
+        lowPass = GetComponent<AudioLowPassFilter>();
     }
 
     void Update()
     {
-        if (isDead) return;
-
         // Sanity death shortcut
-        if (sanityManager.sanity <= 0f)
+        if (SanityManager.sanity <= 0f)
         {
-            Invoke(nameof(KillPlayer), 2f);
-            isDead = true;
+            Invoke(nameof(SanityManager.KillPlayer), 2f);
             return;
         }
 
-        if (!insideRoom)
-        {
-            if (!flashlight.IsOn)
-            {
-                doorOpenAmount += Time.deltaTime * 0.1f; // slow open
-                doorOpenAmount = Mathf.Clamp01(doorOpenAmount);
-                door.localRotation = Quaternion.Euler(0f, doorOpenAmount * 90f, 0f);
-            }
-            else
-            {
-                if(doorOpenAmount > 0)
-                {
-                    // Slam door if it was open
-                    audioSource.PlayOneShot(doorBangSFX, 100f);
-                }
-                doorOpenAmount = 0f;
-                door.localRotation = Quaternion.identity;
-            }
-        }
-        else
-        {
-            HandleInsideMovement();
-        }
-    }
+        if (SanityManager.isDead || SanityManager.sanity <= 0f) return;
 
-    void KillPlayer()
-    {
-        Debug.Log("Monster killed player!");
-        isDead = true;
-        // trigger jumpscare, blackout, restart, etc
+        if (Time.time >= nextOpenTime)
+        {
+            if(!audioSource.isPlaying)
+                audioSource.Play();
+
+            bool open = doorOpenAmount > 0f;
+            lowPass.enabled = true;
+            doorOpenAmount += (flashlight.IsOn) ? -doorCloseSpeed * Time.deltaTime : doorOpenSpeed * Time.deltaTime;
+            doorOpenAmount = Mathf.Clamp(doorOpenAmount, 0, maxOpenDegrees);
+                      
+            door.localRotation = Quaternion.Euler(0f, doorOpenAmount, 0f);
+            lowPass.cutoffFrequency = Mathf.Lerp(1000, 5000, doorOpenAmount/maxOpenDegrees);
+            audioSource.volume = Mathf.Lerp(0, maxMonsterVolume, doorOpenAmount/maxOpenDegrees);
+
+            if (open && doorOpenAmount <= 0)
+            {
+                audioSource.Stop();
+                Debug.Log("BANG!");
+                open = false;
+                lowPass.enabled = false;
+                audioSource.volume = 1f;
+                audioSource.PlayOneShot(doorBangSFX, doorBangVolume);
+                nextOpenTime = Time.time + Random.Range(minWaitTime, maxWaitTime);
+            }
+
+            if (doorOpenAmount >= maxOpenDegrees)
+            {
+                audioSource.volume = 0;
+                SanityManager.KillPlayer();
+            }
+        }
     }
 }
