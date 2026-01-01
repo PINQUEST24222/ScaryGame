@@ -10,10 +10,16 @@ public class SanityManager : MonoBehaviour
     public AudioSource breathingSource;
     public AnimationCurve volumeCurve;
 
+    [Header("Jumpscare Audio")]
+    public GameObject jumpscareObject;
+    public AudioClip jumpscareClip;
+    public float jumpscareVolume;
+
     public static bool isDead = false;
 
     void Start()
     {
+        jumpscareObject.SetActive(false);
         breathingSource.loop = true;
         breathingSource.volume = 0f;
         breathingSource.Play();
@@ -28,16 +34,19 @@ public class SanityManager : MonoBehaviour
 
         breathingSource.volume = volumeCurve.Evaluate(sanity);
 
-        if (sanity <= 0f)
+        if (sanity <= 0f && !isDead)
         {
-            AudioListener.volume = 0f;
+            isDead = true;
+            breathingSource.Stop();
             Invoke("KillPlayer", 2f);
         }
     }
 
-    public static void KillPlayer()
+    void KillPlayer()
     {
         Debug.Log("YOU DIED!!!");
-        isDead = true;
+        breathingSource.volume = 1f;
+        breathingSource.PlayOneShot(jumpscareClip, jumpscareVolume);
+        jumpscareObject.SetActive(true);
     }
 }

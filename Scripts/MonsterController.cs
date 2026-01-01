@@ -37,13 +37,6 @@ public class MonsterController : MonoBehaviour
 
     void Update()
     {
-        // Sanity death shortcut
-        if (SanityManager.sanity <= 0f)
-        {
-            Invoke(nameof(SanityManager.KillPlayer), 2f);
-            return;
-        }
-
         if (SanityManager.isDead || SanityManager.sanity <= 0f) return;
 
         if (Time.time >= nextOpenTime)
@@ -74,7 +67,7 @@ public class MonsterController : MonoBehaviour
             if (doorOpenAmount >= maxOpenDegrees)
             {
                 audioSource.volume = 0;
-                SanityManager.KillPlayer();
+                SanityManager.sanity = 0;
             }
         }
     }
