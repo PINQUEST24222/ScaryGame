@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TitleScreenFlashlight : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class TitleScreenFlashlight : MonoBehaviour
         if (mainCamera == null || flashlight == null) return;
 
         // 🔦 Flashlight follow cursor
-        Vector3 mousePos = Input.mousePosition;
+        Vector3 mousePos = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         mousePos.z = distanceAhead;
         Vector3 targetPos = mainCamera.ScreenToWorldPoint(mousePos);
         Vector3 direction = (targetPos - flashlight.transform.position).normalized;
