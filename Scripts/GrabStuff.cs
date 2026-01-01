@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class GrabStuff : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class GrabStuff : MonoBehaviour
     public LayerMask grabbable;
     public float grabDuration;
     public Transform cam;
+
+    [Header("UI")]
+    public Image grabProgressBar;
 
     [Header("Items")]
     public float pillRestoreAmount;
@@ -29,6 +33,7 @@ public class GrabStuff : MonoBehaviour
         if (grabAction.IsPressed() && Physics.SphereCast(cam.transform.position, grabRadius, cam.transform.forward, out hit, grabRange, grabbable, QueryTriggerInteraction.Ignore))
         {
             grabProgress += Time.deltaTime / grabDuration;
+            grabProgressBar.fillAmount = grabProgress;
             if(grabProgress >= 1)
             {
                 Debug.Log("Took a pill!");
