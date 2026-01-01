@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SanityManager : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class SanityManager : MonoBehaviour
     public GameObject jumpscareObject;
     public AudioClip jumpscareClip;
     public float jumpscareVolume;
+    public float jumpscareDuration;
 
     public static bool isDead = false;
 
@@ -48,5 +50,11 @@ public class SanityManager : MonoBehaviour
         breathingSource.volume = 1f;
         breathingSource.PlayOneShot(jumpscareClip, jumpscareVolume);
         jumpscareObject.SetActive(true);
+        Invoke("LoadMainMenu", jumpscareDuration);
+    }
+
+    void LoadMainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 }
