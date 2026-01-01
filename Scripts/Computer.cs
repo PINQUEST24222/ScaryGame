@@ -5,6 +5,7 @@ public class Computer : MonoBehaviour
     public GameObject screen;
     public float minTime;
     public float maxTime;
+    public float sanityDrainRate;
     private float nextTurnOnTime;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -17,14 +18,15 @@ public class Computer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Time.time >= nextTurnOnTime)
+        if (screen.activeSelf)
         {
-            screen.SetActive(true);
+            SanityManager.sanity -= sanityDrainRate * Time.deltaTime;
         }
 
-        if (!screen.activeSelf)
+        if (Time.time >= nextTurnOnTime)
         {
             nextTurnOnTime = Time.time + Random.Range(minTime, maxTime);
-        }
+            screen.SetActive(true);
+        }        
     }
 }
