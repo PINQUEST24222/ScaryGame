@@ -28,17 +28,24 @@ public class GrabStuff : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(grabProgress);
+        grabProgressBar.fillAmount = grabProgress;
         RaycastHit hit;
         if (grabAction.IsPressed() && Physics.SphereCast(cam.transform.position, grabRadius, cam.transform.forward, out hit, grabRange, grabbable, QueryTriggerInteraction.Ignore))
         {
-            grabProgress += Time.deltaTime / grabDuration;
-            grabProgressBar.fillAmount = grabProgress;
+            grabProgress += Time.deltaTime / grabDuration;         
             if(grabProgress >= 1)
             {
-                Debug.Log("Took a pill!");
-                grabProgress = 0;
-                SanityManager.sanity += pillRestoreAmount;
+                if (hit.transform.gameObject.CompareTag("Pill"))
+                {
+                    Debug.Log("Took a pill!");
+                    grabProgress = 0;
+                    SanityManager.sanity += pillRestoreAmount;
+                }
+                if (hit.transform.gameObject.CompareTag("Computer"))
+                {
+                    Debug.Log("Turning off computer.");
+                    hit.transform.gameObject.SetActive(false);
+                }
             }
         }
         else
