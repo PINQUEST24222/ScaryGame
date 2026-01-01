@@ -10,7 +10,7 @@ public class FlashlightController : MonoBehaviour
     private InputAction flashlightAction;
 
     [Header("Battery")]
-    public float Battery = 100f;
+    public static float Battery = 100f;
     public float DrainRate = 12f;
     public float RechargeRate = 6f;
 

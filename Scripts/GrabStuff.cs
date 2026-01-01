@@ -16,6 +16,7 @@ public class GrabStuff : MonoBehaviour
 
     [Header("Items")]
     public float pillRestoreAmount;
+    public float batteryRestoreAmount;
 
     private InputAction grabAction;
     private float grabProgress;
@@ -41,10 +42,15 @@ public class GrabStuff : MonoBehaviour
                     grabProgress = 0;
                     SanityManager.sanity += pillRestoreAmount;
                 }
-                if (hit.transform.gameObject.CompareTag("Computer"))
+                else if (hit.transform.gameObject.CompareTag("Computer"))
                 {
                     Debug.Log("Turning off computer.");
                     hit.transform.gameObject.SetActive(false);
+                }
+                else if (hit.transform.gameObject.CompareTag("Battery"))
+                {
+                    FlashlightController.Battery += batteryRestoreAmount;
+                    FlashlightController.Battery = Mathf.Clamp(FlashlightController.Battery, 0f, 100f);
                 }
             }
         }
