@@ -12,6 +12,7 @@ public class AmbientSound : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        source = GetComponent<AudioSource>();
         nextTime = Time.time + Random.Range(minTime, maxTime);
     }
 
