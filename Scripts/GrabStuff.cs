@@ -52,6 +52,10 @@ public class GrabStuff : MonoBehaviour
                     FlashlightController.Battery += batteryRestoreAmount;
                     FlashlightController.Battery = Mathf.Clamp(FlashlightController.Battery, 0f, 100f);
                 }
+                else if (hit.transform.gameObject.CompareTag("Cross"))
+                {
+                    hit.transform.gameObject.GetComponent<CrossMonster>().rotateAmount = 0;
+                }
             }
         }
         else

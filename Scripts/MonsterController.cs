@@ -5,7 +5,6 @@ public class MonsterController : MonoBehaviour
 {
     [Header("References")]
     public FlashlightController flashlight;
-    public SanityManager sanityManager;
     public Transform door;          // door to open
 
     [Header("Door Settings")]
