@@ -16,14 +16,15 @@ public class CrossMonster : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        transform.localRotation = Quaternion.Euler(0f, 0f, rotateAmount);
         if (!cross.GetComponent<MeshRenderer>().isVisible)
         {
             rotateAmount += rotateSpeed * Time.deltaTime;
-            if(rotateAmount >= 180)
+            rotateAmount = Mathf.Clamp(rotateAmount, 0, 180);
+            if (rotateAmount >= 180)
             {
                 SanityManager.sanity -= sanityDrainSpeed * Time.deltaTime;
             }
-            cross.transform.localRotation = Quaternion.Euler(rotateAmount, 0f, 0f);
         }
     }
 }
